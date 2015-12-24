@@ -4,7 +4,7 @@ A number of command line utilities to help analyse the difference between a set 
 The .INI used by urldiffer.py looks like this :
 
     [baseline]
-    baseline: 
+    baseurl = https://wiki.python.org/moin/ConfigParserExamples/
     [comparisons]
     url1 = http://stackoverflow.com/questions/335695/lists-in-configparser
     url2 = https://www.google.co.nz
