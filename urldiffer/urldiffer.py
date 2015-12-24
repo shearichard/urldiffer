@@ -51,8 +51,6 @@ def find_query_diff(baselineurl, dic_of_urls_to_compare):
     report on it.
     '''
     dic_urls_qry = {}
-    import pdb
-    pdb.set_trace()
     for desc, url in dic_of_urls_to_compare.iteritems():
         dic_urls_qry[desc] = parse_query(url)
 
@@ -64,14 +62,15 @@ def find_query_diff(baselineurl, dic_of_urls_to_compare):
 
     print("XXX")
     for desc, dic_url_qry in dic_urls_qry.iteritems():
+        print()
         for argname, argval in dic_url_qry.iteritems():
             if argname in baseline_urls_qry:
                 if (collections.Counter(dic_url_qry[argname]) == collections.Counter(baseline_urls_qry[argname])):
                     pass
                 else:
-                    print(argname + " exists in both " + desc + " and baseline but values are different")
+                    print(argname + " exists in both " + desc + " and baseline but values are different. Value in " + desc + " is " + str(dic_url_qry[argname]) + " . Value in baseline is " + str(baseline_urls_qry[argname]) + " .")
             else:
-                print(argname + " exists in " + desc + " but not in " + baselineurl)
+                print(argname + " exists in " + desc + " but not in baseline")
 
 def main():
     dic_ini_data = get_ini_data()
