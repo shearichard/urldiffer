@@ -4,6 +4,9 @@ from urlparse import urlparse, parse_qs
 import ConfigParser
 import collections
 import csv
+import tempfile
+import os
+from datetime import datetime
 
 
 def config_diag(parser):
@@ -58,24 +61,83 @@ def parse_query(url):
 
 def get_csv_data():
     '''
-    Read URL's from CSV
+    Read URL's from CSV. Returns a list of dictionaries
+
+    The expected headings are : 
+
+    SETTINGS|USAGE|URL
     '''
     csv.register_dialect('piper', delimiter='|', quoting=csv.QUOTE_NONE)
-    import pdb
-    pdb.set_trace()
+    lst = []
     with open('differ.csv', "rb") as csvfile:
         for row in csv.DictReader(csvfile, dialect='piper'):
             print(row)
+            lst.append(row)
+
+    return lst
+
+def makeTempDir():
+    path2dir = tempfile.mkdtemp()
+    return path2dir
+
+
+def getTempPath(fName, dPath=None):
+    if dPath==None:
+        path2dir = makeTempDir()
+    else:
+        path2dir = dPath
+    fullpath = os.path.join(path2dir,fName)
+    return fullpath
+
+
+def getiso():
+    d=datetime.now()
+    return d.strftime('%Y%m%dT%H%M%S')
+
+
+def find_common(lst_dic_all_urls):
+    '''
+    Outputs a report on those elements which 
+    are common to all urls
+    '''
+    #Load up the first one
+    common_dic = parse_query(lst_dic_all_urls[0]['URL'])
+
+    lst_non_common_argname = []
+    #Iterate over each of our urls of interest
+    for elem in lst_dic_all_urls:
+        #Iterate over each of the keys in the baseline dic
+        for argname in common_dic:
+            #If there's a baseline dic key not in the current
+            #url then mark it for removal from the baseline dic
+            if argname not in elem['URL'] and argname not in lst_non_common_argname:
+                lst_non_common_argname.append(argname)
+
+    import pdb
+    pdb.set_trace()
+    for arg in lst_non_common_argname:
+        del common_dic[arg]
+
+    print(common_dic)
+
+    output_path = getTempPath("differ.html")
+    print(output_path)
+    with open(output_path, 'wt') as f:
+        f.write('contents go here')
 
 
 def find_query_diff(baselineurl,
                     dic_of_urls_to_compare,
-                    lst_excluded_categories):
+                    lst_excluded_categories,
+                    lst_dic_all_urls):
     '''
     For each url in `lst_of_urls_to_compare` find those parts
     of the query which do not exist in the `baselineurl` and
     report on it.
     '''
+
+    find_common(lst_dic_all_urls)
+
     dic_urls_qry = {}
     for settings, urldic in dic_of_urls_to_compare.iteritems():
         if settings not in dic_urls_qry:
@@ -123,10 +185,11 @@ def find_query_diff(baselineurl,
 
 def main():
     dic_ini_data = get_ini_data()
+    lst_dic = get_csv_data()
     find_query_diff(dic_ini_data['baselineurl'],
                     dic_ini_data['diccompurls'],
-                    dic_ini_data['excluded_categories'])
-    get_csv_data()
+                    dic_ini_data['excluded_categories'], 
+                    lst_dic)
 
 if __name__ == "__main__":
     main()
