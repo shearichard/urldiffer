@@ -3,6 +3,7 @@ import pprint
 from urlparse import urlparse, parse_qs
 import ConfigParser
 import collections
+import csv
 
 
 def config_diag(parser):
@@ -55,6 +56,18 @@ def parse_query(url):
     return p_actual
 
 
+def get_csv_data():
+    '''
+    Read URL's from CSV
+    '''
+    csv.register_dialect('piper', delimiter='|', quoting=csv.QUOTE_NONE)
+    import pdb
+    pdb.set_trace()
+    with open('differ.csv', "rb") as csvfile:
+        for row in csv.DictReader(csvfile, dialect='piper'):
+            print(row)
+
+
 def find_query_diff(baselineurl,
                     dic_of_urls_to_compare,
                     lst_excluded_categories):
@@ -81,8 +94,6 @@ def find_query_diff(baselineurl,
     pprint.pprint(baseline_urls_qry)
 
     print("XXX")
-    import pdb
-    pdb.set_trace()
     for settings, dicurl in dic_urls_qry.iteritems():
         print()
         print("- " + settings)
@@ -115,6 +126,7 @@ def main():
     find_query_diff(dic_ini_data['baselineurl'],
                     dic_ini_data['diccompurls'],
                     dic_ini_data['excluded_categories'])
+    get_csv_data()
 
 if __name__ == "__main__":
     main()
