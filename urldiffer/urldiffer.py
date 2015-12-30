@@ -4,6 +4,7 @@ from urlparse import urlparse, parse_qs
 import ConfigParser
 import collections
 
+
 def config_diag(parser):
     print()
     print("START DIAG")
@@ -25,24 +26,23 @@ def get_ini_data():
     parser.read("./differ.ini")
     if False:
         config_diag(parser)
-      
-    cat_items = parser.items( "excludecategories" )
+
+    cat_items = parser.items("excludecategories")
     lst_ex_cat = []
     for key, value in cat_items:
         lst_ex_cat.append(value)
 
-
-    path_items = parser.items( "comparisons" )
+    path_items = parser.items("comparisons")
     dicout = {}
     for key, value in path_items:
         lst_val = value.split("|")
-        category = lst_val[0]
         if lst_val[0] not in dicout:
             dicout[lst_val[0]] = {}
         dicout[lst_val[0]][lst_val[1]] = lst_val[2]
 
-    baselineurl = parser.get('baseline', 'baseurl') 
+    baselineurl = parser.get('baseline', 'baseurl')
     return {'excluded_categories': lst_ex_cat, 'baselineurl': baselineurl, 'diccompurls': dicout}
+
 
 def parse_query(url):
     '''
@@ -54,12 +54,13 @@ def parse_query(url):
     p_actual = parse_qs(o_actual.query)
     return p_actual
 
-def find_query_diff(baselineurl, 
+
+def find_query_diff(baselineurl,
                     dic_of_urls_to_compare,
                     lst_excluded_categories):
     '''
     For each url in `lst_of_urls_to_compare` find those parts
-    of the query which do not exist in the `baselineurl` and 
+    of the query which do not exist in the `baselineurl` and
     report on it.
     '''
     dic_urls_qry = {}
@@ -102,7 +103,7 @@ def find_query_diff(baselineurl,
                 if argname in dic_url_qry:
                     pass
                 else:
-                    lstout.append(argname + " exists in baseline but not in " + desc )
+                    lstout.append(argname + " exists in baseline but not in " + desc)
 
             lstout.sort()
             for msg in lstout:
