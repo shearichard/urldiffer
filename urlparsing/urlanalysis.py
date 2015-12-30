@@ -13,6 +13,7 @@ DESIRED = "/query/?0_description=~&0_closed=0&0_owner=137&0_future_colour=red&0_
 DESIREDDESC = "NF TRUE/FALSE/TRUE AS PER SPEC"
 DESIRED = "/query/?0_description=~&0_closed=0&0_owner=137&0_future_colour=red&0_has_performance=1&1_closed=0&1_data_entry_user=137&1_future_colour=red&1_has_performance=1&order=id&col=id&col=description&col=owner&col=data_entry_user&col=performance_colour&col=value&col=performance_explanation&col=future_colour&col=future_recommendation&as_of=as_of"
 
+
 def find_diff(p_actual, p_desired):
     for k, v in p_actual.iteritems():
         if k in p_desired:
@@ -32,8 +33,9 @@ def find_diff(p_actual, p_desired):
         else:
             print(k + " exists in p_desired but not in p_actual")
 
+
 def main():
-    print("ACTUAL ============================" + ACTUALDESC) 
+    print("ACTUAL ============================" + ACTUALDESC)
     o_actual = urlparse(ACTUAL)
     p_actual = parse_qs(o_actual.query)
     pprint.pprint(p_actual)
