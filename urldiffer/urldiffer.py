@@ -7,6 +7,7 @@ import csv
 import tempfile
 import os
 from datetime import datetime
+import copy
 
 
 def config_diag(parser):
@@ -102,16 +103,33 @@ def find_common(lst_dic_all_urls):
     '''
     #Load up the first one
     common_dic = parse_query(lst_dic_all_urls[0]['URL'])
+    common_values_dic = copy.deepcopy(common_dic)
 
     lst_non_common_argname = []
+    lst_common_argname_different_values = []
     #Iterate over each of our urls of interest
     for elem in lst_dic_all_urls:
+        print("=======================================")
+        this_elem_dic = parse_query(elem['URL'])
         #Iterate over each of the keys in the baseline dic
         for argname in common_dic:
             #If there's a baseline dic key not in the current
             #url then mark it for removal from the baseline dic
+            print(argname)
             if argname not in elem['URL'] and argname not in lst_non_common_argname:
                 lst_non_common_argname.append(argname)
+
+            if (argname in common_values_dic) and (argname in this_elem_dic):
+                if (collections.Counter(common_values_dic[argname]) == collections.Counter(this_elem_dic[argname])):
+                    pass
+                else:
+                    if argname not in lst_common_argname_different_values:
+                        lst_common_argname_different_values.append(argname)
+            else:
+                if (argname in this_elem_dic):
+                    common_values_dic[argname] = this_elem_dic[argname]
+
+
 
     import pdb
     pdb.set_trace()
