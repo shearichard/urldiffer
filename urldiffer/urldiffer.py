@@ -66,7 +66,7 @@ def get_csv_data():
 
     The expected headings are : 
 
-    SETTINGS|USAGE|URL
+    LINKTYPE|SETTINGS|USAGE|URL
     '''
     csv.register_dialect('piper', delimiter='|', quoting=csv.QUOTE_NONE)
     lst = []
@@ -77,14 +77,15 @@ def get_csv_data():
 
     return lst
 
-def makeTempDir():
-    path2dir = tempfile.mkdtemp()
+def makeTempDir(label):
+    dirprfx = "%s-%s-" % (getiso(), label)
+    path2dir = tempfile.mkdtemp(prefix=dirprfx)
     return path2dir
 
 
-def getTempPath(fName, dPath=None):
+def getTempPath(fName, dPath=None, label="UNKNOWN"):
     if dPath==None:
-        path2dir = makeTempDir()
+        path2dir = makeTempDir(label)
     else:
         path2dir = dPath
     fullpath = os.path.join(path2dir,fName)
@@ -96,7 +97,125 @@ def getiso():
     return d.strftime('%Y%m%dT%H%M%S')
 
 
-def find_common(lst_dic_all_urls):
+def dump_url(elem, f):
+    f.write("1======================================\n")
+    f.write("\n")
+    f.write("\n")
+    f.write(elem['USAGE'])
+    f.write("\n")
+    f.write(elem['LINKTYPE'])
+    f.write("\n")
+    f.write(elem['SETTINGS'])
+    f.write("\n")
+    f.write(elem['URL'])
+    f.write("\n")
+    f.write("\n")
+    this_elem_dic = parse_query(elem['URL'])
+    pprint.pprint(this_elem_dic, f)
+    f.write("2======================================\n")
+
+
+def output_urls_filtered(lst_dic_all_urls, 
+                lst_inc_only_usage=None, 
+                lst_inc_only_linktype=None, 
+                lst_inc_only_settings=None):
+    '''
+    Outputs a report on those elements which 
+    are common to all urls
+    '''
+
+    lst_non_common_argname = []
+    lst_common_argname_different_values = []
+    for elem in lst_dic_all_urls:
+        if (((lst_inc_only_usage == None) or (elem['USAGE'] in lst_inc_only_usage))
+            and ((lst_inc_only_linktype == None) or (elem['LINKTYPE'] in lst_inc_only_linktype))
+            and ((lst_inc_only_settings == None) or (elem['SETTINGS'] in lst_inc_only_settings))):
+            common_dic = parse_query(elem['URL'])
+            common_values_dic = copy.deepcopy(common_dic)
+            break
+            
+    output_path = getTempPath("differ.html")
+    print(output_path)
+    with open(output_path, 'wt') as f:
+        for elem in lst_dic_all_urls:
+            if (((lst_inc_only_usage == None) or (elem['USAGE'] in lst_inc_only_usage))
+                and ((lst_inc_only_linktype == None) or (elem['LINKTYPE'] in lst_inc_only_linktype))
+                and ((lst_inc_only_settings == None) or (elem['SETTINGS'] in lst_inc_only_settings))):
+                dump_url(elem, f)
+                this_elem_dic = parse_query(elem['URL'])
+                #Iterate over each of the keys in the baseline dic
+                for argname in common_dic:
+                    #If there's a baseline dic key not in the current
+                    #url then mark it for removal from the baseline dic
+                    print(argname)
+                    if argname not in elem['URL'] and argname not in lst_non_common_argname:
+                        lst_non_common_argname.append(argname)
+
+                    if (argname in common_values_dic) and (argname in this_elem_dic):
+                        if (collections.Counter(common_values_dic[argname]) == collections.Counter(this_elem_dic[argname])):
+                            pass
+                        else:
+                            if argname not in lst_common_argname_different_values:
+                                lst_common_argname_different_values.append(argname)
+                    else:
+                        if (argname in this_elem_dic):
+                            common_values_dic[argname] = this_elem_dic[argname]
+
+        f.write("3= lst_non_common_argname =====================================\n")
+        pprint.pprint(lst_non_common_argname, f)
+        f.write("4= lst_common_argname_different_values =====================================\n")
+        pprint.pprint(lst_common_argname_different_values, f)
+        f.write("5======================================\n")
+
+
+    output_path = getTempPath("differ.txt", label="ARGUSAGE")
+    print(output_path)
+    lst_args = []
+    dic_args = {}
+    import pdb
+    pdb.set_trace()
+    with open(output_path, 'wt') as f:
+        f.write("lst_inc_only_usage\n")
+        pprint.pprint(lst_inc_only_usage, f)
+        f.write("lst_inc_only_linktype\n")
+        pprint.pprint(lst_inc_only_linktype, f)
+        f.write("lst_inc_only_settings\n")
+        pprint.pprint(lst_inc_only_settings, f)
+        f.write("\n\n")
+        for elem in lst_dic_all_urls:
+            if (((lst_inc_only_usage == None) or (elem['USAGE'] in lst_inc_only_usage))
+                and ((lst_inc_only_linktype == None) or (elem['LINKTYPE'] in lst_inc_only_linktype))
+                and ((lst_inc_only_settings == None) or (elem['SETTINGS'] in lst_inc_only_settings))):
+                this_elem_dic = parse_query(elem['URL'])
+                for argname in this_elem_dic:
+                    if argname not in lst_args:
+                        lst_args.append(argname)
+                    if argname in dic_args:
+                        dic_args[argname]['count'] += 1
+                        dic_args[argname]['where'].append(elem['SETTINGS'])
+                        dic_args[argname]['values'].append(lst_dic_all_urls['elem']) 
+                    else:
+                        dic_args[argname] = {'count':1, 'where': [elem['SETTINGS']], 'values': [lst_dic_all_urls['elem']]} 
+
+        f.write("\n\n")
+        pprint.pprint(dic_args, f)
+        f.write("\n\n")
+        for k in dic_args:
+            if dic_args[k]['count'] == 4:
+                f.write("%s -> %s\n" % ( str(k) , dic_args[k]['count']))
+                f.write("\n")
+        f.write("\n\n\n\n")
+        for k in dic_args:
+            if dic_args[k]['count'] != 4:
+                f.write("%s -> %s\n" % ( str(k) , dic_args[k]['count']))
+                pprint.pprint(dic_args[k]['where'], f)
+                f.write("\n")
+
+
+def find_common(lst_dic_all_urls, 
+                lst_inc_only_usage=None, 
+                lst_inc_only_linktype=None, 
+                lst_inc_only_settings=None):
     '''
     Outputs a report on those elements which 
     are common to all urls
@@ -109,30 +228,32 @@ def find_common(lst_dic_all_urls):
     lst_common_argname_different_values = []
     #Iterate over each of our urls of interest
     for elem in lst_dic_all_urls:
-        print("=======================================")
-        this_elem_dic = parse_query(elem['URL'])
-        #Iterate over each of the keys in the baseline dic
-        for argname in common_dic:
-            #If there's a baseline dic key not in the current
-            #url then mark it for removal from the baseline dic
-            print(argname)
-            if argname not in elem['URL'] and argname not in lst_non_common_argname:
-                lst_non_common_argname.append(argname)
+        if (((lst_inc_only_usage == None) or (elem['USAGE'] in lst_inc_only_usage))
+            and ((lst_inc_only_linktype == None) or (elem['LINKTYPE'] in lst_inc_only_linktype))
+            and ((lst_inc_only_settings == None) or (elem['SETTINGS'] in lst_inc_only_settings))):
+            print("=======================================")
+            this_elem_dic = parse_query(elem['URL'])
+            #Iterate over each of the keys in the baseline dic
+            for argname in common_dic:
+                #If there's a baseline dic key not in the current
+                #url then mark it for removal from the baseline dic
+                print(argname)
+                if argname not in elem['URL'] and argname not in lst_non_common_argname:
+                    lst_non_common_argname.append(argname)
 
-            if (argname in common_values_dic) and (argname in this_elem_dic):
-                if (collections.Counter(common_values_dic[argname]) == collections.Counter(this_elem_dic[argname])):
-                    pass
+                if (argname in common_values_dic) and (argname in this_elem_dic):
+                    if (collections.Counter(common_values_dic[argname]) == collections.Counter(this_elem_dic[argname])):
+                        pass
+                    else:
+                        if argname not in lst_common_argname_different_values:
+                            lst_common_argname_different_values.append(argname)
                 else:
-                    if argname not in lst_common_argname_different_values:
-                        lst_common_argname_different_values.append(argname)
-            else:
-                if (argname in this_elem_dic):
-                    common_values_dic[argname] = this_elem_dic[argname]
+                    if (argname in this_elem_dic):
+                        common_values_dic[argname] = this_elem_dic[argname]
 
 
 
-    import pdb
-    pdb.set_trace()
+
     for arg in lst_non_common_argname:
         del common_dic[arg]
 
@@ -153,8 +274,8 @@ def find_query_diff(baselineurl,
     of the query which do not exist in the `baselineurl` and
     report on it.
     '''
-
-    find_common(lst_dic_all_urls)
+    output_urls_filtered(lst_dic_all_urls, ['FIN'], ['RED'], None)
+    find_common(lst_dic_all_urls, ['FIN'], ['RED'], None)
 
     dic_urls_qry = {}
     for settings, urldic in dic_of_urls_to_compare.iteritems():
