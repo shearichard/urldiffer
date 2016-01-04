@@ -45,8 +45,6 @@ def get_ini_data():
             dicout[lst_val[0]] = {}
         dicout[lst_val[0]][lst_val[1]] = lst_val[2]
 
-    import pdb
-    pdb.set_trace()
     do_composite_diff = parser.getboolean('processing', 'do_composite_diff')
     do_single_diff = parser.getboolean('processing', 'do_single_diff')
 
@@ -332,7 +330,53 @@ def find_query_diff(baselineurl,
                 print(msg)
 
 def do_simple_diff():
-    print("This is do simple diff")
+    parser = ConfigParser.ConfigParser()
+    parser.read("./differ.ini")
+
+    url1 = parser.get('simplediff', 'u1')
+    url1_desc = parser.get('simplediff', 'u1_desc')
+    url2 = parser.get('simplediff', 'u2')
+    url2_desc = parser.get('simplediff', 'u2_desc')
+    dic_url1 = parse_query(url1)
+    dic_url2 = parse_query(url2)
+
+    import pdb
+    pdb.set_trace()
+    print("*" * 40)
+    print("URL1: %s" % url1_desc)
+    print(url1)
+    print(" ")
+    pprint.pprint(dic_url1)
+    print("*" * 40)
+    print("*" * 40)
+    print("URL2: %s" % url2_desc)
+    print(url2)
+    print(" ")
+    pprint.pprint(dic_url2)
+    print("*" * 40)
+    print(" ")
+    print(" ")
+
+    lstout = []
+    for argname, argval in dic_url1.iteritems():
+        if argname in dic_url2:
+            if (collections.Counter(dic_url1[argname]) == collections.Counter(dic_url1[argname])):
+                pass
+            else:
+                #lstout.append(argname + " exists in both but values are different. Value in " + desc + " is " + str(dic_url_qry[argname]) + " . Value in baseline is " + str(baseline_urls_qry[argname]) + " .")
+                lstout.append(argname + " exists in both but values are different.")
+        else:
+            lstout.append(argname + " exists in %s but not in %s" % (url1_desc, url2_desc))
+
+    for argname, argval in dic_url2.iteritems():
+        if argname in dic_url1:
+            pass
+        else:
+            lstout.append(argname + " exists in %s but not in %s" % (url2_desc, url1_desc))
+
+    lstout.sort()
+    for msg in lstout:
+        print(msg)
 
 
 def main():
