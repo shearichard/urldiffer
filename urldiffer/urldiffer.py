@@ -193,9 +193,9 @@ def output_urls_filtered(lst_dic_all_urls,
                     if argname in dic_args:
                         dic_args[argname]['count'] += 1
                         dic_args[argname]['where'].append(elem['SETTINGS'])
-                        dic_args[argname]['values'].append(lst_dic_all_urls['elem']) 
+                        dic_args[argname]['values'].append(this_elem_dic[argname]) 
                     else:
-                        dic_args[argname] = {'count':1, 'where': [elem['SETTINGS']], 'values': [lst_dic_all_urls['elem']]} 
+                        dic_args[argname] = {'count':1, 'where': [elem['SETTINGS']], 'values': [this_elem_dic[argname]]} 
 
         f.write("\n\n")
         pprint.pprint(dic_args, f)
