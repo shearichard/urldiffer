@@ -45,8 +45,19 @@ def get_ini_data():
             dicout[lst_val[0]] = {}
         dicout[lst_val[0]][lst_val[1]] = lst_val[2]
 
+    import pdb
+    pdb.set_trace()
+    do_composite_diff = parser.getboolean('processing', 'do_composite_diff')
+    do_single_diff = parser.getboolean('processing', 'do_single_diff')
+
     baselineurl = parser.get('baseline', 'baseurl')
-    return {'excluded_categories': lst_ex_cat, 'baselineurl': baselineurl, 'diccompurls': dicout}
+
+    return {'excluded_categories': lst_ex_cat, 
+            'baselineurl': baselineurl, 
+            'diccompurls': dicout,
+            'do_composite_diff': do_composite_diff,
+            'do_single_diff': do_single_diff
+            }
 
 
 def parse_query(url):
@@ -72,7 +83,6 @@ def get_csv_data():
     lst = []
     with open('differ.csv', "rb") as csvfile:
         for row in csv.DictReader(csvfile, dialect='piper'):
-            print(row)
             lst.append(row)
 
     return lst
@@ -321,14 +331,23 @@ def find_query_diff(baselineurl,
             for msg in lstout:
                 print(msg)
 
+def do_simple_diff():
+    print("This is do simple diff")
+
 
 def main():
+
     dic_ini_data = get_ini_data()
     lst_dic = get_csv_data()
-    find_query_diff(dic_ini_data['baselineurl'],
-                    dic_ini_data['diccompurls'],
-                    dic_ini_data['excluded_categories'], 
-                    lst_dic)
+
+    if dic_ini_data['do_composite_diff']:
+        find_query_diff(dic_ini_data['baselineurl'],
+                        dic_ini_data['diccompurls'],
+                        dic_ini_data['excluded_categories'], 
+                        lst_dic)
+
+    if dic_ini_data['do_single_diff']:
+        do_simple_diff()
 
 if __name__ == "__main__":
     main()
