@@ -375,8 +375,11 @@ def do_simple_diff():
             lstout.append(argname + " exists in %s but not in %s" % (url2_desc, url1_desc))
 
     lstout.sort()
-    for msg in lstout:
-        print(msg)
+    if lstout:
+        for msg in lstout:
+            print(msg)
+    else:
+        print("The two urls are identical")
 
 
 def main():
