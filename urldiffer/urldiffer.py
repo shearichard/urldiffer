@@ -358,6 +358,7 @@ def do_simple_diff():
     print(" ")
 
     lstout = []
+    lst_common_argname_different_values = []
     for argname, argval in dic_url1.iteritems():
         if argname in dic_url2:
             if (collections.Counter(dic_url1[argname]) == collections.Counter(dic_url1[argname])):
@@ -374,12 +375,32 @@ def do_simple_diff():
         else:
             lstout.append(argname + " exists in %s but not in %s" % (url2_desc, url1_desc))
 
+    for argname, argval in dic_url1.iteritems():
+        if (argname in dic_url1) and (argname in dic_url2):
+            if (collections.Counter(dic_url1[argname]) == collections.Counter(dic_url2[argname])):
+                pass
+            else:
+                if argname not in lst_common_argname_different_values:
+                    lst_common_argname_different_values.append(argname)
+    for argname, argval in dic_url2.iteritems():
+        if (argname in dic_url1) and (argname in dic_url2):
+            if (collections.Counter(dic_url1[argname]) == collections.Counter(dic_url2[argname])):
+                pass
+            else:
+                if argname not in lst_common_argname_different_values:
+                    lst_common_argname_different_values.append(argname)
+
     lstout.sort()
     if lstout:
         for msg in lstout:
             print(msg)
     else:
         print("The two urls are identical")
+
+    print("Common argnames with different values")
+    if lst_common_argname_different_values:
+        for a in lst_common_argname_different_values:
+            print(a)
 
 
 def main():
