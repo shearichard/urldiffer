@@ -180,8 +180,6 @@ def output_urls_filtered(lst_dic_all_urls,
     print(output_path)
     lst_args = []
     dic_args = {}
-    import pdb
-    pdb.set_trace()
     with open(output_path, 'wt') as f:
         f.write("lst_inc_only_usage\n")
         pprint.pprint(lst_inc_only_usage, f)
@@ -340,8 +338,6 @@ def do_simple_diff():
     dic_url1 = parse_query(url1)
     dic_url2 = parse_query(url2)
 
-    import pdb
-    pdb.set_trace()
     print("*" * 40)
     print("URL1: %s" % url1_desc)
     print(url1)
