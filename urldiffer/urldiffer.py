@@ -9,6 +9,7 @@ import os
 from datetime import datetime
 import copy
 
+URLDIFFERVERSION="2.0"
 
 def config_diag(parser):
     print()
@@ -414,4 +415,5 @@ def main():
         do_simple_diff()
 
 if __name__ == "__main__":
+    print("urldiffer - Version " + URLDIFFERVERSION)
     main()
